@@ -7,9 +7,10 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .config import Settings, settings
-from .models import AnalysisRequest, AnalysisResponse
-from .services.analysis_service import run_analysis
+# استيرادات مطلقة بدل النسبية
+from config import Settings, settings
+from models import AnalysisRequest, AnalysisResponse
+from services.analysis_service import run_analysis
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -38,7 +39,7 @@ def create_app() -> FastAPI:
     )
 
     @app.get("/health", response_model=HealthResponse)
-    async def health_check(config: Settings = Depends(get_settings)) -> HealthResponse:  # type: ignore[name-defined]
+    async def health_check(config: Settings = Depends(get_settings)) -> HealthResponse:
         return HealthResponse(
             status="ok",
             service_account=config.ee_service_account,
@@ -55,7 +56,7 @@ def create_app() -> FastAPI:
                 request.buffer_meters,
             )
             return run_analysis(request)
-        except Exception as exc:  # pylint: disable=broad-exception-caught
+        except Exception as exc:
             logger.exception("Analysis failed")
             raise HTTPException(status_code=500, detail=str(exc)) from exc
 
