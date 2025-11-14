@@ -4,33 +4,29 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from pydantic import BaseModel, RootModel, ValidationError
+from pydantic import BaseModel, RootModel
 
 
 class Settings(BaseModel):
     """Application settings loaded from environment variables."""
 
     ee_service_account: str
-    ee_credentials_path: Path
     algeria_asset_id: str = "projects/ee-bensefiasofian/assets/Maine"
     default_buffer_m: int = 10000
 
     @classmethod
     def from_env(cls, env: Optional[dict[str, str]] = None) -> "Settings":
         data = env or os.environ
-        credentials_path = data.get("EE_CREDENTIALS_PATH")
-        if not credentials_path:
-            raise ValueError(
-                "EE_CREDENTIALS_PATH environment variable is required and must point to the service account JSON file."
-            )
+
+        # لم نعد نحتاج EE_CREDENTIALS_PATH
         service_account = data.get("EE_SERVICE_ACCOUNT")
         if not service_account:
             raise ValueError(
                 "EE_SERVICE_ACCOUNT environment variable is required and must contain the Earth Engine service account email."
             )
+
         return cls(
             ee_service_account=service_account,
-            ee_credentials_path=Path(credentials_path).expanduser().resolve(),
             algeria_asset_id=data.get(
                 "ALGERIA_REGION_ASSET",
                 "projects/ee-bensefiasofian/assets/Maine",
